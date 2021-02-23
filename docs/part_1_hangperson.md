@@ -4,7 +4,7 @@ Part 1: Hangperson
 With all this machinery in mind, clone this repo and let's work on Hangperson.
 
 ```sh
-$ git clone https://github.com/saasbook/hw-sinatra-saas-hangperson
+$ git clone https://github.com/kurniawano/hw-sinatra-saas-hangperson
 $ cd hw-sinatra-saas-hangperson
 $ bundle
 ```
