@@ -162,33 +162,50 @@ In this case we are prefixing with `bundle exec` again in order to ensure we are
 
 Modify `app.rb` to print a different message, and verify that the change is detected by refreshing your browser tab with the running app.  Also before we move on you should commit your latest changes to git.
 
-Deploy to Heroku
-----------------
-Heroku is a cloud platform-as-a-service (PaaS) where we can deploy our Sinatra (and later Rails) applications. If you don't have an account yet, go sign up at http://www.heroku.com. You'll need your login and password for the next step.
+Deploy to Google App Engine
+---------------------------
+Google App Engine is a cloud platform-as-a-service (PaaS) where we can deploy our Sinatra (and later Rails) applications. If you don't have an account yet, go sign up at http://cloud.google.com. You'll need your login and password for the next step.
 
-Install Heroku CLI following [instructions](https://devcenter.heroku.com/articles/heroku-cli).
+Your gcloud CLI should have already been installed. If it is not the case, you can follow the [instructions](https://cloud.google.com/sdk/docs/quickstart).
 
-Log in to your Heroku account by typing the command: `heroku login -i` in the terminal. This will connect you to your Heroku account.
+To initialize the google cloud sdk:
+```bash
+gcloud init
+```
 
-While in the root directory of your project (not your whole workspace), type `heroku create` to create a new project in Heroku. This will tell the Heroku service to prepare for some incoming code, and locally it will add a remote git repository for you called `heroku`.
+Follow the instruction to setup your gcloud sdk. You can also update the sdk to make sure you have the latest version:
+```bash
+gcloud components update
+```
+
+While in the root directory of your project (not your whole workspace), type 
+
+```
+gcloud projects create hw-myapp --set-as-default
+```
+
+to create a new project in Google App Engine called `hw-myapp`. Initialize your App Engine with your project and choose its region:
+
+```
+gcloud app create --project=hw-myapp
+```
 
 Next, make sure you stage and commit all changes locally as instructed above (i.e. `git add`, `git commit`, etc).
 
-Earlier we saw that to run the app locally you run `rackup` to start the Rack appserver, and Rack looks in `config.ru` to determine how to start your Sinatra app.  How do you tell a production environment how to start an appserver or other processes necessary to receive requests and start your app?  In the case of Heroku, this is done with a special file named `Procfile`,  which specifies one or more types of Heroku processes your app will use, and how to start each one. The most basic Heroku process type is called a Dyno, or "web worker".  One Dyno can serve one user request at a time.  Since we're on Heroku's free tier, we can only have one Dyno. Let's create a file named `Procfile`, and only this as the name (i.e. Procfile.txt is not valid). Write the following line in your `Procfile`:
+Earlier we saw that to run the app locally you run `rackup` to start the Rack appserver, and Rack looks in `config.ru` to determine how to start your Sinatra app.  How do you tell a production environment how to start an appserver or other processes necessary to receive requests and start your app?  In the case of Google App Engine, this is done with a special file named `app.yml`,  which specifies the configuration of what your app will use, and how to start your app. Open `app.yml` and make sure you have the following line:
 
 ```
-web: bundle exec rackup config.ru -p $PORT
+entrypoint: bundle exec rackup -p $PORT
 ```
 
-This tells Heroku to start a single web worker (Dyno) using essentially the same command line you used to start Rack locally. Note that in some cases, a `Procfile` is not necessary since Heroku can infer from your files how to start the app. However, it's always better to be explicit.
+This is the same command to run `rackup` as we did previously with some specified port.
 
-Your local repo is now ready to deploy to Heroku:
+Your local repo is now ready to deploy to Google App Engine:
 
 ```
-$ git push heroku master
+$ gcloud app deploy
 ```
 
-(`master` refers to which branch of the remote Heroku repo we are pushing to.  We'll learn about branches later in the course, but for now, suffice it to say that you can only deploy to the `master` branch on Heroku.) This push will create a running instance of your app at some URL ending with `herokuapp.com`. Enter that URL in a new browser tab to see your app running live. Congratulations, you did it--your app is live!
 
 Summary
 -------
@@ -201,7 +218,7 @@ Summary
 
 * You versioned the important files containing not only your app's code but the necessary info to reproduce all the libraries it relies on and the file that starts up the app.
 
-* You deployed this simple app to Heroku.
+* You deployed this simple app to Google App Engine.
 
 -----
 
