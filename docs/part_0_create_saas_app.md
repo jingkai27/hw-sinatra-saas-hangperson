@@ -1,6 +1,4 @@
-Part 0: Demystifying SaaS app creation
-==============================
-
+--------------
 **Goal:** Understand the steps needed to create, version, and deploy a SaaS app, including tracking the libraries it depends on so that your production and development environments are as similar as possible.
 
 **What you will do:** Create a simple "hello world" app using the Sinatra framework, version it properly, and deploy it to Heroku.
@@ -16,14 +14,15 @@ Happily, Ruby has a wonderful system for managing gem dependencies: a gem called
 
 Let's start with the following steps:
 
-* Create a new empty directory to hold your new app, and use `git init` in that directory to start versioning it with Git.
+* Create a new empty directory to hold your new app, type `mkdir myapp`.
+
+* Use `git init` in that directory to start versioning it with Git.
 
 * In that directory, create a new file called `Gemfile` (the capitalization is important) with the following contents.  This file will be a permanent part of your app and will travel with your app anywhere it goes:
 
 ```rb
 source 'https://rubygems.org'
-ruby '2.6.6'
-
+ruby '>= 2.2.0', '< 3.0.0'
 gem 'sinatra', '>= 2.0.1'
 ```
 
@@ -49,16 +48,9 @@ The first command stages all changed files for committing. The second command co
 
 #### Self Check Questions (click triangle to check your answer)
 
-<details>
-  <summary>What's the difference between the purpose and contents of <code>Gemfile</code> and <code>Gemfile.lock</code>?  Which file is needed to completely reproduce the development environment's gems in the production environment?</summary>
-  <p><blockquote><code>Gemfile</code> specifies the gems you need and in some cases the constraints on which version(s) are acceptable. <code>Gemfile.lock</code> records the *actual* versions found, not only of the gems you specified explicitly but also any other gems on which they depend, so it is the file used by the production environment to reproduce the gems available in the development environment.</blockquote></p>
-</details>
+<details><summary>What's the difference between the purpose and contents of <code>Gemfile</code> and <code>Gemfile.lock</code>?  Which file is needed to completely reproduce the development environment's gems in the production environment?</summary><p><blockquote><code>Gemfile</code> specifies the gems you need and in some cases the constraints on which version(s) are acceptable. <code>Gemfile.lock</code> records the *actual* versions found, not only of the gems you specified explicitly but also any other gems on which they depend, so it is the file used by the production environment to reproduce the gems available in the development environment.</blockquote></p></details>
 <br />
-<details>
-  <summary>After running <code>bundle</code>, why are there gems listed in <code>Gemfile.lock</code>
-that were not listed in <code>Gemfile</code>?</summary>
-  <p><blockquote>Bundler looked up the information for each Gem you requested (in this case, only <code>sinatra</code>) and realized that it depends on other gems, which in turn depend on still others, so it recursively installed all those dependencies.  For example, the <code>rack</code> appserver is a gem, and while you didn't explicitly request it, <code>sinatra</code> depends on it.  This is an example of the power of automation: rather than requiring you (the app developer) to understand every Gem dependency, Bundler automates that process and lets you focus only on your app's top-level dependencies.</blockquote></p>
-</details>
+<details><summary>After running <code>bundle</code>, why are there gems listed in <code>Gemfile.lock</code>that were not listed in <code>Gemfile</code>?</summary><p><blockquote>Bundler looked up the information for each Gem you requested (in this case, only <code>sinatra</code>) and realized that it depends on other gems, which in turn depend on still others, so it recursively installed all those dependencies.  For example, the <code>rack</code> appserver is a gem, and while you didn't explicitly request it, <code>sinatra</code> depends on it.  This is an example of the power of automation: rather than requiring you (the app developer) to understand every Gem dependency, Bundler automates that process and lets you focus only on your app's top-level dependencies.</blockquote></p></details>
 
 
 Create a simple SaaS app with Sinatra
@@ -73,6 +65,10 @@ Create a file in your project called `app.rb` containing the following:
 ```rb
 require 'sinatra'
 
+set :bind, "0.0.0.0"
+port = ENV["PORT"] || "8080"
+set :port, port
+
 class MyApp < Sinatra::Base
   get '/' do
     "<!DOCTYPE html><html><head></head><body><h1>Hello World</h1></body></html>"
@@ -84,10 +80,7 @@ The `get` method is provided by the `Sinatra::Base` class, from which our `MyApp
 
 #### Self Check Question
 
-<details>
-  <summary>What *two* steps did we take earlier to guarantee that the Sinatra library is available to load in line 1?</summary>
-  <p><blockquote> We specified <code>gem 'sinatra'</code> in the <code>Gemfile</code> *and* successfully ran <code>bundle</code> to confirm that the gem is installed and "lock" the correct version of it in <code>Gemfile.lock</code>.</blockquote></p>
-</details>
+<details><summary>What *two* steps did we take earlier to guarantee that the Sinatra library is available to load in line 1?</summary><p><blockquote> We specified <code>gem 'sinatra'</code> in the <code>Gemfile</code> *and* successfully ran <code>bundle</code> to confirm that the gem is installed and "lock" the correct version of it in <code>Gemfile.lock</code>.</blockquote></p></details>
 
 <br />
 
@@ -102,25 +95,27 @@ run MyApp
 
 The first line tells Rack that our app lives in the file `app.rb`, which you created above to hold your app's code.  We have to explicitly state that our `app` file is located in the current directory (.) because `require` normally looks only in standard system directories to find gems.
 
-You're now ready to test-drive our simple app with a command line:
-| Local computer | Codio |
-|-----|------|
-| `$ bundle exec rackup` | `$ bundle exec rackup --host 0.0.0.0` |
 
-This command starts the Rack appserver and the WEBrick webserver.  Prefixing it with `bundle exec` ensures that you are running with the gems specified in `Gemfile.lock`.  Rack will look for `config.ru` and attempt to start our app based on the information there.
+<details><summary>If you are developing locally</summary>
+If you're developing locally, you're now ready to test-drive our simple app with this command line: `$ bundle exec rackup` <br> This command starts the Rack appserver and the WEBrick webserver.  Prefixing it with `bundle exec` ensures that you are running with the gems specified in `Gemfile.lock`.  Rack will look for `config.ru` and attempt to start our app based on the information there. <br> If you're developing locally, you can visit `localhost:9292` in your browser to see the webapp. It will open in a new tab in the IDE if you click on it, but you should open up a fresh browser tab and paste in that URL. <br> Point a new Web browser tab at the running app's URL and verify that you can see "Hello World". </details>
 
-To see the webapp:
+If you're developing in Codio, you're now ready to test-drive our simple app with this command line: `$bundle exec rackup --host 0.0.0.0`. This command starts the Rack appserver and the WEBrick webserver.  Prefixing it with `bundle exec` ensures that you are running with the gems specified in `Gemfile.lock`.  Rack will look for `config.ru` and attempt to start our app based on the information there.
 
-| Local computer | Codio |
-|-----|------|
-| Visit `localhost:9292` in your browser to see the webapp. It will open in a new tab in the IDE if you click on it, but you should open up a fresh browser tab and paste in that URL. <br><br> Point a new Web browser tab at the running app's URL and verify that you can see "Hello World". | Click the "Box URL" button on your top tool bar that has been pre-configured to point at port 9292: <br> <br> ![BoxURL](https://global.codio.com/content/BoxURL.png) <br> <br> The app should open in a new tab. Verify that you can see "Hello World". |
+If you're developing in Codio, you can configure a button for easy previewing. Click the drop down arrow on the middle button and click "New Browser Tab"
+
+![.guides/img/PreviewingApp](.guides/img/PreviewingApp.png)
+
+Click the drop down again and select the last option, "Configure...."
+
+Change the "Box URL" option from port 3000 to port 9292 so it looks like: `"Box URL": "http://{{domain9292}}/",`
+
+Finally, go back into the same drop down and select "Box URL". The app should open in a new tab. Verify that you can see "Hello World".
+
+Now, to preview the app, simply click the middle button that says "Box URL".
 
 #### Self Check Question
 
-<details>
-  <summary>What happens if you try to visit a non-root URL such as <code>https://workspace-username.c9.io/hello</code> and why? (your URL root will vary)</summary>
-  <p><blockquote> You'll get a humorous error message from the Sinatra framework, since you don't have a route matching <code>get '/hello'</code> in your app.  Since Sinatra is a SaaS framework, the error message is packaged up in a Web page and delivered to your browser.</blockquote></p>
-</details>
+<details><summary>What happens if you try to visit a non-root URL such as <code>https://workspace-username.c9.io/hello</code> and why? (your URL root will vary)</summary><p><blockquote> You'll get a humorous error message from the Sinatra framework, since you don't have a route matching <code>get '/hello'</code> in your app.  Since Sinatra is a SaaS framework, the error message is packaged up in a Web page and delivered to your browser.</blockquote></p></details>
 
 <br />
 
@@ -133,7 +128,7 @@ Modify `app.rb` so that instead of "Hello World" it prints "Goodbye World". Save
 
 No changes? Confused?
 
-Now go back to the shell window where you ran `rackup` and press Ctrl-C to stop Rack.  Then type `bundle exec rackup` for local developemt or `$bundle exec rackup --host 0.0.0.0` for Codio development again, and once it is running, go back to your browser tab with your app and refresh the page.  This time it should work.
+Now go back to the shell window where you ran `rackup` and press Ctrl-C to stop Rack.  Then type `bundle exec rackup` again, and once it is running, go back to your browser tab with your app and refresh the page.  This time it should work.
 
 What this shows you is that if you modify your app while it's running, you have to restart Rack in order for it to "see" those changes.  Since restarting it manually is tedious, we'll use the `rerun` gem, which restarts Rack automatically when it sees changes to files in the app's directory. (Rails does this for you by default during development, as we'll see, but Sinatra doesn't.)
 
@@ -149,16 +144,9 @@ Now run `bundle install` to have it download the `rerun` gem and any dependencie
 
 Any gem specifications inside the `group :development` block will only be examined if bundle is run in the development environment.  (The other environments you can specify are :test and :production, and you can define new environments yourself.)  Gem specifications outside of any group block are assumed to apply in all environments.
 
-Say the following in the terminal window to start your app and verify the app is running:
-| Local computer | Codio |
-|-----|------|
-| `$ bundle exec rerun -- rackup ` | `$ bundle exec rerun -- rackup -p 9292 -o 0.0.0.0` |
+Say `bundle exec rerun "rackup --host 0.0.0.0"` in the terminal window to start your app and verify the app is running.  There are more details on rerun's usage available in the gem's [GitHub README](https://github.com/alexch/rerun#usage). Gem's are usually on GitHub and their README's full of helpful instructions about how to use them.
 
-There are more details on rerun's usage available in the gem's [GitHub
-README](https://github.com/alexch/rerun#usage). Gems are usually on
-GitHub and their READMEs are usually full of helpful instructions about how to use them.
-
-In this case we are prefixing with `bundle exec` again in order to ensure we are using the gems in the Gemfile.lock, and the `--` symbol is there to assert that the command we want rerun to operate with is `rackup -p $PORT -o $IP`.  We could achieve the same effect with `bundle exec rerun "rackup -p 9292 -o 0.0.0.0"`.  They are equivalent.   More importantly, any detected changes will now cause the server to restart automatically, similar to the use of `guard` to auto re-run specs when files change.
+In this case we are prefixing with `bundle exec` again in order to ensure we are using the gems in the Gemfile.lock, and the `--` symbol is there to assert that the command we want rerun to operate with is `rackup -p $PORT -o $IP`.  We could achieve the same effect with `bundle exec rerun "rackup -p $PORT -o $IP"`.  They are equivalent.   More importantly any detected changes will now cause the server to restart automatically, similar to the use of `guard` to auto re-run specs when files change.
 
 Modify `app.rb` to print a different message, and verify that the change is detected by refreshing your browser tab with the running app.  Also before we move on you should commit your latest changes to git.
 
@@ -168,44 +156,94 @@ Google App Engine is a cloud platform-as-a-service (PaaS) where we can deploy ou
 
 Your gcloud CLI should have already been installed. If it is not the case, you can follow the [instructions](https://cloud.google.com/sdk/docs/quickstart).
 
+To begin, go to [GCloud console](https://console.cloud.google.com) and create a new project under your google account where GCloud credits have been applied. You can name the project `hangperson`.
+
 To initialize the google cloud sdk:
 ```bash
 gcloud init
 ```
 
-Follow the instruction to setup your gcloud sdk. You can also update the sdk to make sure you have the latest version:
-```bash
-gcloud components update
-```
-
-While in the root directory of your project (not your whole workspace), type 
+You maybe asked to login to your google account. Make sure you login to your google account where GCloud credit has been applied. If you are asked to select a project, choose the project you have just created. For example, if you previously created `hangperson`, you will this project name in one of the list item as shown below. The other project names may not be the same as yours.
 
 ```
-gcloud projects create hw-myapp --set-as-default
+Pick cloud project to use: 
+ [1] cohesive-sign-303709
+ [2] hangperson
+ [3] Create a new project
+Please enter numeric choice or text value (must exactly match list 
+item):  2
 ```
-
-to create a new project in Google App Engine called `hw-myapp`. Initialize your App Engine with your project and choose its region:
-
+To deploy the application to the nearest region. Run the following code:
 ```
-gcloud app create --project=hw-myapp
+gcloud config set run/region asia-southeast1
 ```
+The above will set the default deployment to region in `asia-southeast1`. 
 
 Next, make sure you stage and commit all changes locally as instructed above (i.e. `git add`, `git commit`, etc).
 
-Earlier we saw that to run the app locally you run `rackup` to start the Rack appserver, and Rack looks in `config.ru` to determine how to start your Sinatra app.  How do you tell a production environment how to start an appserver or other processes necessary to receive requests and start your app?  In the case of Google App Engine, this is done with a special file named `app.yml`,  which specifies the configuration of what your app will use, and how to start your app. Open `app.yml` and make sure you have the following line:
+Earlier we saw that to run the app locally you run `rackup` to start the Rack appserver, and Rack looks in `config.ru` to determine how to start your Sinatra app.  How do you tell a production environment how to start an appserver or other processes necessary to receive requests and start your app?  In this exercise, we will create a `Dockerfile` which contains the command to run the application when it is deployed. To do this, create a new text file called `Dockerfile` in the `myapp` directory.
 
 ```
-entrypoint: bundle exec rackup -p $PORT
+# Use the official lightweight Ruby image.
+# https://hub.docker.com/_/ruby
+FROM ruby:2.5
+
+# Install production dependencies.
+WORKDIR /usr/src/app
+COPY Gemfile Gemfile.lock ./
+ENV BUNDLE_FROZEN=true
+RUN gem install bundler 
+RUN bundle config set --local without 'test'
+RUN bundle install 
+
+# Copy local code to the container image.
+COPY . ./
+
+# Run the web service on container startup.
+CMD ["bundle", "exec", "rackup", "--host", "0.0.0.0", "-p", "8080"]
 ```
 
-This is the same command to run `rackup` as we did previously with some specified port.
+The first line `FROM ruby:2.5` uses an existing image with the tag `ruby:2.5` to create an image for the container. A list of Ruby's container image can be found at [https://hub.docker.com/_/ruby](https://hub.docker.com/_/ruby).The following line specifies the working directory using `WORKDIR` keyword. Next we copy the `Gemfile` into the working directory. The next line set an environment variable called `BUNDLE_FROZEN` and set it to `true`. The next three lines install bundler and install all packages specified in the Gemfile. 
 
-Your local repo is now ready to deploy to Google App Engine:
+The second last line is to copy all the files to the working directory in the container. Finally, the last line run the command to run the application. This is the same command to run `rackup` as we did previously with some specified port which in this case is port 8080.
+
+We can then build the container image and store it in the Container Registry using the following command.
 
 ```
-$ gcloud app deploy
+gcloud builds submit --tag gcr.io/PROJECT-ID/hangperson1
 ```
 
+You can get the project id by running the following command.
+
+```
+gcloud config get-value project
+```
+
+For example, if your project id is `hangperson`, you should run the command as shown below.
+```
+gcloud builds submit --tag gcr.io/hangperson/hangperson1
+```
+
+When the built is successful, you should see the word that the `STATUS` is `SUCCESS` in the last few lines. Now, you are ready to use Cloud Run to run your container image.
+
+```
+gcloud run deploy --image gcr.io/PROJECT-ID/hangperson1
+```
+
+Similarly, replace the PROJECT-ID to your project id. 
+- You will be prompted for the service name: press Enter to accept the default name, hangperson1.
+- You will be prompted for region: select the region of your choice, for example asia-southeast1.
+- You will be prompted to allow unauthenticated invocations: respond y .
+
+Once the deployment is done, you will see something as the following:
+
+```
+Done.                                                                                
+Service [hangperson1] revision [hangperson1-00006-fen] has been deployed and is serving 100 percent of traffic.
+Service URL: https://hangperson1-x2opf4qreq-as.a.run.app
+```
+
+The exact URL maybe different, but you should see a URL at the end. Visit the URL to test that your deployment is successful.
 
 Summary
 -------
@@ -218,8 +256,6 @@ Summary
 
 * You versioned the important files containing not only your app's code but the necessary info to reproduce all the libraries it relies on and the file that starts up the app.
 
-* You deployed this simple app to Google App Engine.
+* You deployed this simple app to Google Cloud using Cloud Build and Cloud Run.
 
 -----
-
-Next: [Part 1 - Hangperson](part_1_hangperson.md)
