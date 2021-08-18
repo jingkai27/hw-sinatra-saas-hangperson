@@ -1,6 +1,4 @@
-
-Part 3: Connecting HangpersonGame to Sinatra
-============================================
+-----------------
 
 You've already met Sinatra.  Here's what's new in the Sinatra app skeleton [`app.rb`](../app.rb) that we provide for Hangperson:
 
@@ -12,11 +10,8 @@ You've already met Sinatra.  Here's what's new in the Sinatra app skeleton [`app
 
 #### Self Check Question
 
-<details>
-  <summary><code>@game</code> in this context is an instance variable of what
-class?  (Careful-- tricky!)</summary>
-  <p><blockquote>It's an instance variable of the <code>HangpersonApp</code> class in the app.rb file.  Remember we are dealing with two Ruby classes here: the <code>HangpersonGame</code> class encapsulates the game logic itself (that is, the Model in model-view-controller), whereas <code>HangpersonApp</code> encapsulates the logic that lets us deliver the game as SaaS (you can roughly think of it as the Controller logic plus the ability to render the views via <code>erb</code>).</blockquote></p>
-</details>
+<details><summary><code>@game</code> in this context is an instance variable of what
+class?  (Careful-- tricky!)</summary><p><blockquote>It's an instance variable of the <code>HangpersonApp</code> class in the app.rb file.  Remember we are dealing with two Ruby classes here: the <code>HangpersonGame</code> class encapsulates the game logic itself (that is, the Model in model-view-controller), whereas <code>HangpersonApp</code> encapsulates the logic that lets us deliver the game as SaaS (you can roughly think of it as the Controller logic plus the ability to render the views via <code>erb</code>).</blockquote></p></details>
 
 The Session
 -----------
@@ -31,50 +26,73 @@ To do this, we use the `sinatra-flash` gem, which you can see in the Gemfile.  `
 
 #### Self Check Question
 
-<details>
-  <summary>Why does this save work compared to just storing those
-messages in the <code>session[]</code> hash?</summary>
-  <p><blockquote>When we put something in <code>session[]</code> it stays there until we delete it.  The common case for a message that must survive a redirect is that it should only be shown once; <code>flash[]</code> includes the extra functionality of erasing the messages after the next request.</blockquote></p>
-</details>
+<details><summary>Why does this save work compared to just storing those
+messages in the <code>session[]</code> hash?</summary><p><blockquote>When we put something in <code>session[]</code> it stays there until we delete it.  The common case for a message that must survive a redirect is that it should only be shown once; <code>flash[]</code> includes the extra functionality of erasing the messages after the next request.</blockquote></p></details>
 
 Running the Sinatra app
 -----------------------
 
-As before, run the shell command `bundle exec rackup` to start the app, or `bundle exec rerun -- rackup` if you want to rerun the app each time you make a code change.
+As before, run the shell command `bundle exec rackup --host 0.0.0.0` to start the app, or `bundle exec rerun -- rackup` if you want to rerun the app each time you make a code change.
 
 #### Self Check Question
 
-<details>
-  <summary>Based on the output from running this command, what is the full URL you need to visit in order to visit the New Game page?</summary>
-  <p><blockquote>The Ruby code <code>get '/new' do...</code> in <code>app.rb</code> renders the New Game page, so the full URL is in the form <code>http://localhost:9292/new</code></p>
-</details>
+<details><summary>Based on the output from running this command, what is the full URL you need to visit in order to visit the New Game page?</summary><p><blockquote>The Ruby code <code>get '/new' do...</code> in <code>app.rb</code> renders the New Game page, so the full URL is in the form <code>http://localhost:9292/new</code></p></details>
 <br />
 
 Visit this URL and verify that the Start New Game page appears.
 
 #### Self Check Question
 
-<details>
-  <summary>Where is the HTML code for this page?</summary>
-  <p><blockquote>It's in <code>views/new.erb</code>, which is processed into HTML by the <code>erb :new</code> directive.</blockquote></p>
-</details>
+<details><summary>Where is the HTML code for this page?</summary><p><blockquote>It's in <code>views/new.erb</code>, which is processed into HTML by the <code>erb :new</code> directive.</blockquote></p></details>
 <br />
 
 Verify that when you click the New Game button, you get an error.  This is because we've deliberately left the `<form>` that encloses this button incomplete: we haven't specified where the form should post to. We'll do that next, but we'll do it in a test-driven way.
 
-But first, let's get our app onto Google App Engine.  This is actually a critical step.  We need to ensure that our app will run on heroku **before** we start making significant changes.
+But first, let's get our app onto Google Cloud.  This is actually a critical step.  We need to ensure that our app will run on GCloud **before** we start making significant changes.
 
 * First, run `bundle install` to make sure our Gemfile and Gemfile.lock are in sync.
 * Next, type `git add .` to stage all changed files (including Gemfile.lock)
 * Then type `git commit -m "Ready for Deployment!"` to commit all local changes.
-* Since this is the first time we're telling Google App Engine about the Hangperson app, we must type `gcloud project create hw-hangperson --set-as-default` to create the project.
-* Then, type `gcloud app create --project=hw-hangperson` to link the app with the project. 
-* Then, type `gcloud app deploy` to push your code to Google App Engine.
-* When you want to update Google App Engine later, you only need to commit your changes to git locally, then deploy to Google App Engine as in the last step.
-* Verify that the Google App Engine-deployed Hangperson behaves the same as your development version before continuing. A few lines up from the bottom of the gcloud output in the terminal should have a URL ending in appspot.com. Find that, copy it to the clipboard, and paste it into a browser tab to see the current app.
+* Since this is the first time we're telling Google App Engine about the Hangperson app, we must type `gcloud projects create hw-hangperson --set-as-default` to create the project.
+* Go to [Cloud Build Settings page](https://console.cloud.google.com/cloud-build/settings) and make sure that *Cloud Run Admin* role is set to ENABLED.
+
+This time, we will put up our build and run options into a YAML file called `cloudbuild.yaml`. Make sure you have this file in your app root directory.
+
+```
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/PROJECT-ID/IMAGE', '.']
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/PROJECT-ID/IMAGE']
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'SERVICE-NAME', '--image', 'gcr.io/PROJECT-ID/IMAGE', '--region', 'asia-southeast1', '--platform', 'managed']
+images:
+- gcr.io/PROJECT-ID/IMAGE
+```
+
+You need to modify the value of `PROJECT-ID` to your project id. You can use the following command to get your project id.
+
+```
+gcloud config get-value project
+```
+
+You need to specify also the `IMAGE` name and the `SERVICE-NAME`. For example, you can set the `IMAGE` name to be `hangperson_img` and `SERVICE-NAME` to be `hangperson-service`.
+
+* Then, type ` gcloud builds submit` to build the container image and upload it to Container Registry. 
+* Then, type `gcloud run deploy` to push your code to Cloud Run.
+* When you want to update Google Cloud Run later, you only need to commit your changes to git locally, build the container image and submit to Container Registry, and then deploy to Cloud Run as in the last step.
+
+You can try to access your service by clicking the URL given in the last output after running `gcloud run deploy`. If you encounter a Forbidden Error shown in the image below, follow the steps given below.
+![](https://www.dropbox.com/s/coq01txguzk8lac/Error_Forbidden_CloudRun.png?raw=1)
+* Go to Google Console **Cloud Run**. [Click here](https://console.cloud.google.com/run). Make sure you select the current project you have created.
+* Click the SERVICE-NAME in the list and then click on the tab PERMISSION. 
+* Add "allUsers" to Members and add the Role "Cloud Run Invoker". See the image below.
+![](https://www.dropbox.com/s/5ger78n61itvkhh/Enable_AllUser_CloudRunInvoker.png?raw=1)
+
+Once you have done all these, you can try again and see if the service is accessible.
+* Verify that the deployed Hangperson behaves the same as your development version before continuing. 
 * Verify the broken functionality by clicking the new game button.
-
-
------
-
-Next: [Part 4 - Cucumber](part_4_cucumber.md)
