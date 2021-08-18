@@ -83,10 +83,10 @@ gcloud config get-value project
 You need to specify also the `IMAGE` name and the `SERVICE-NAME`. For example, you can set the `IMAGE` name to be `hangperson_img` and `SERVICE-NAME` to be `hangperson-service`.
 
 * Then, type ` gcloud builds submit` to build the container image and upload it to Container Registry. 
-* Then, type `gcloud run deploy` to push your code to Cloud Run.
+* Then, type `gcloud run deploy --image gcr.io/PROJECT-ID/IMAGE` to push your code to Cloud Run. Enter the **region** and **service name** that you have set previously in `cloudbuild.yaml`.
 * When you want to update Google Cloud Run later, you only need to commit your changes to git locally, build the container image and submit to Container Registry, and then deploy to Cloud Run as in the last step.
 
-You can try to access your service by clicking the URL given in the last output after running `gcloud run deploy`. If you encounter a Forbidden Error shown in the image below, follow the steps given below.
+You can try to access your service by clicking the URL given in the last output after running `gcloud run deploy --image gcr.io/PROJECT-ID/IMAGE`. If you encounter a Forbidden Error shown in the image below, follow the steps given below.
 ![](https://www.dropbox.com/s/coq01txguzk8lac/Error_Forbidden_CloudRun.png?raw=1)
 * Go to Google Console **Cloud Run**. [Click here](https://console.cloud.google.com/run). Make sure you select the current project you have created.
 * Click the SERVICE-NAME in the list and then click on the tab PERMISSION. 
