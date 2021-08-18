@@ -2,7 +2,13 @@ require 'sinatra/base'
 require 'sinatra/flash'
 require './lib/hangperson_game.rb'
 
+
+
 class HangpersonApp < Sinatra::Base
+  
+  set :bind, "0.0.0.0"
+  port = ENV["PORT"] || "8080"
+  set :port, port
 
   enable :sessions
   register Sinatra::Flash
