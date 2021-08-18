@@ -63,7 +63,7 @@ The create-new-game code in the Sinatra app should do the following:
 
 View how these steps are actualized in the app.rb file under the `post /create do` route.
 
-Now stage and commit all files locally, then `gcloud builds submit` and `gcloud run deploy --image gcr.io/PROJECT-ID/IMAGE` to create the container image and deploy to Cloud Run again and manually verify this improved behavior.
+Now stage and commit all files locally, then `gcloud builds submit` to create the container image and deploy to Cloud Run again and manually verify this improved behavior.
 
 #### Self Check Question
 
