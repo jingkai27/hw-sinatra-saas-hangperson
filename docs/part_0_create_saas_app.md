@@ -150,13 +150,13 @@ In this case we are prefixing with `bundle exec` again in order to ensure we are
 
 Modify `app.rb` to print a different message, and verify that the change is detected by refreshing your browser tab with the running app.  Also before we move on you should commit your latest changes to git.
 
-Deploy to Google App Engine
+Using Google Cloud Build and Deploy to Google Cloud Run
 ---------------------------
 Google App Engine is a cloud platform-as-a-service (PaaS) where we can deploy our Sinatra (and later Rails) applications. If you don't have an account yet, go sign up at http://cloud.google.com. You'll need your login and password for the next step.
 
 Your gcloud CLI should have already been installed. If it is not the case, you can follow the [instructions](https://cloud.google.com/sdk/docs/quickstart).
 
-To begin, go to [GCloud console](https://console.cloud.google.com) and create a new project under your google account where GCloud credits have been applied. You can name the project `hangperson`.
+To begin, go to [GCloud console](https://console.cloud.google.com) and create a new project under your google account where GCloud credits have been applied. You can name the project `hangperson`. Make sure you **enable billing** for this project before you proceed.
 
 To initialize the google cloud sdk:
 ```bash
@@ -223,6 +223,25 @@ For example, if your project id is `hangperson`, you should run the command as s
 ```
 gcloud builds submit --tag gcr.io/hangperson/hangperson1
 ```
+
+Sometimes the built may not be successful due to lack of permission. For example, you may encounter the following error message:
+
+```
+PERMISSION_DENIED: Service Usage API has not been used in project 678683108242 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/serviceusage.googleapis.com/overview?project=678683108242 then retry.
+```
+
+Click on the URL to enable the API.
+
+You may also need to allow access to the Cloud Storage. If you do not have access, you will encounter the following error.
+
+```
+AccessDeniedException: 403 678683108242@cloudbuild.gserviceaccount.com does not have storage.objects.list access to the Google Cloud Storage bucket.
+ERROR
+```
+
+To solve this problem, go to Cloud Storage and click the name of the bucket you already created. Click the tab PERMISSION, and click the button ADD+. Paste in the service account email you see in the error message and add role of "Storage Admin" to this service account.
+
+Make sure you do not see any error message in the output and continue.
 
 When the built is successful, you should see the word that the `STATUS` is `SUCCESS` in the last few lines. Now, you are ready to use Cloud Run to run your container image.
 
