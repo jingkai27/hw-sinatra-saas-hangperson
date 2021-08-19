@@ -1,6 +1,4 @@
-
-Conclusion
-==========
+------------
 
 This assignment has served as a microcosm or miniature tour of the entire course: during the rest of the course we will investigate each of these in much more detail, and we will also add new techniques---
 
@@ -10,6 +8,8 @@ This assignment has served as a microcosm or miniature tour of the entire course
 
 * *Refactoring* means modifying the structure of your code to improve its quality (maintainability, readability, modifiability) while preserving its behavior.  We will learn to identify *antipatterns* -- warning signs of deteriorating quality in your code -- and opportunities to fix them, sometimes by applying *design patterns* that have emerged as "templates" capturing an effective solution to a class of similar problems. 
 
------
-
-Next: [Optional Challenge Assignment](part_7_optional_challenge.md)  
+One last thing before you end the assignment is to delete your Google Cloud resources. This will ensure that you do not exceed the credits given to you. Follow the steps below.
+* Go to "IAM & Admin" -> "Manage Resources".
+* Click the project name to select which project to delete
+* Click the DELETE button on the top right of the page
+![](https://www.dropbox.com/s/3ijcl7zil6bsv92/Delete_resources.png?raw=1)
