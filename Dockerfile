@@ -6,7 +6,7 @@ FROM jdickey/ruby:2.6.5-alpine
 WORKDIR /usr/src/app
 COPY Gemfile Gemfile.lock ./
 ENV BUNDLE_FROZEN=true
-RUN gem install bundler 
+RUN gem install bundler -v 2.4.22
 RUN bundle config set --local without 'test'
 RUN bundle install 
 
